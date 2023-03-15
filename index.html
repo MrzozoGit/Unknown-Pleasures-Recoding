@@ -11,13 +11,17 @@
     <div class="titleDiv">
       <p class="title">Unknown Pleasures Recoding</p>
     </div>
-    <select class="option" name="renderOption" id="renderoptions">
-      <option value="random">Random</option>
-<!--       <option value="mousepos">Mouse position</option> -->
+    <select class="option" name="renderOption" id="renderoptions" title="change render mode">
+      <option value="classic">Classic</option>
+      <option value="color-inv">Color inversion</option>
+      <option value="music">Music</option>
   </select>
-<!--     <input class="rangeCells" type="range" value="12" min="1" max="50" title="change number of cells"> -->
+  <input class="rangeLines" type="range" value="80" min="0" max="200" step="1" title="change number of lines">
+  <input class="rangeWeight" type="range" value="1.2" min="0" max="10" step="0.01" title="change lines weight">
+  <input class="rangeNoise" type="range" value="0.1" min="0" max="2" step="0.01" title="change noise value">
     <main class="p5canvas clickable" title="click to generate a new cover">
     </main>
+    <p class="legende">Note: to avoid lag, use music mode with a small number of lines!</p>
     <img class="save clickable" src="http://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/4ede10902ae7d51.png" alt="save" title="save image">
     <p class="note">by Guilhem Duval & Enzo Bassot</p>
     <script src="sketch.js"></script>

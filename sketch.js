@@ -1,13 +1,41 @@
+///////////////////
+//// VARIABLES ////
+///////////////////
+
+// DOM variables
+let p5canvas = document.querySelector(".p5canvas");
+let saveButton = document.querySelector(".save");
+let renderOptions = document.querySelector("#renderoptions");
+let rangeWeight = document.querySelector(".rangeWeight");
+let rangeLines = document.querySelector(".rangeLines");
+let rangeNoise = document.querySelector(".rangeNoise");
+
+// Interaction variables
+let nbOfLines = 80;
+let linesWeight = 1.2;
+let noiseValue = 0.1;
+let isMusic = false;
+
+// Audio variables
+let song, analyzer, rms;
+
+
+////////////////////
+//// STRUCTURES ////
+////////////////////
+
 // Unknown Pleasures cover structure
 class UnknownPleasuresCover {
   constructor() {
     this.width = 625;
     this.height = 593;
-    this.nbLines = 80;
+    this.nbLines = nbOfLines;
     this.nbPoints = 500;
-    this.noiseScaleBase = 0.04;
-    this.noiseScaleMiddle = 0.012;
-    this.linesWeight = 1.2;
+    this.noiseScaleBase = parseFloat(noiseValue);
+    this.noiseScaleMiddle = noiseValue * 0.12;
+    this.linesWeight = linesWeight;
+    this.bgColor = "#000000";
+    this.linesColor = "#FFFFFF";
     // Position
     this.xMin = 140;
     this.xMax = this.width - this.xMin;
@@ -19,24 +47,22 @@ class UnknownPleasuresCover {
   }
 }
 
-/////////////////////
-//// VARIABLES //////
-/////////////////////
-// DOM variables
-let p5canvas = document.querySelector(".p5canvas");
-let saveButton = document.querySelector(".save");
-let renderOptions = document.querySelector("#renderoptions");
 
-// Cover variables
+///////////////////////////
+//// UNKNOWN PLEASURES ////
+///////////////////////////
+
 let cover = new UnknownPleasuresCover();
 
-/////////////////////////////
-//// UNKNOWN PLEASURES //////
-/////////////////////////////
-
 function drawRecodingRandom() {
-  noiseSeed(random(1000)); // Generate new noise seed to be able to generate a new cover without having to restart the app
-  background(0); // Fill the background with black
+  if(!isMusic) {
+    // Generate new noise seed to be able to generate a new cover without having to restart the app
+    noiseSeed(random(1000));
+    rms = 1;
+  } else {
+    rms = analyzer.getLevel() * 5;
+  }
+  background(cover.bgColor); // Fill the background with black
   strokeWeight(cover.linesWeight);
 
   var width = cover.width;
@@ -53,22 +79,22 @@ function drawRecodingRandom() {
       let noiseVal = noise(start);
 
       if (x < width / 3 || x > 2 * width / 3) {
-        h = 7;
+        h = 7*rms;
         noiseScale = cover.noiseScaleBase;
       } else {
         if (x < width / 2) {
-          h = map(x, width / 3, width / 2, 7, 100);
+          h = rms*map(x, width / 3, width / 2, 7, 100);
         } else {
-          h = map(x, width / 2, 2 * width / 3, 100, 7);
+          h = rms*map(x, width / 2, 2 * width / 3, 100, 7);
         }
         noiseScale = cover.noiseScaleMiddle;
       }
 
-      fill(0);
-      stroke(0);
+      fill(cover.bgColor);
+      stroke(cover.bgColor);
       line(x, y - h * noiseVal, x, cover.height);
       noFill();
-      stroke(255);
+      stroke(cover.linesColor);
       point(x, y - h * noiseVal);
 
       x += cover.dPoints;
@@ -77,7 +103,7 @@ function drawRecodingRandom() {
 
     y += cover.dLines;
   }
-
+  
   drawText();
 }
 
@@ -86,22 +112,57 @@ function drawText() {
   // textSize(26);
   // fill(255);
   // textSize(45);
-  // var myText = text('JOY DIVISION', cover.xMin+20, 40);
-  fill(255);
+  // var myText = text('JOY DIVISION', cover.xMin+20, 60);
+  fill(cover.linesColor);
   textSize(30);
+  textFont('Helvetica');
   var myText = text('UNKNOWN PLEASURES', cover.xMin-2, cover.yMax+25);
 }
 
-////////////////////////
-//// INTERACTIONS //////
-////////////////////////
+
+//////////////////////
+//// INTERACTIONS ////
+//////////////////////
 
 function canvasClickHandler() {
-  if (renderOptions.value == "mousepos") {
-    drawRecodingMouse();
-  } else if (renderOptions.value == "random") {
+  cover = new UnknownPleasuresCover();
+  if (renderOptions.value == "classic") {
+    if(isMusic == true) {
+      isMusic = false;
+      song.stop();
+    }
     drawRecodingRandom();
+  } else if (renderOptions.value == "color-inv") {
+    if(isMusic == true) {
+      isMusic = false;
+      song.stop();
+    }
+    cover.bgColor = "#FFFFFFF";
+    cover.linesColor = "#000000";
+    drawRecodingRandom();
+  } else if (renderOptions.value == "music") {
+    if(isMusic == false) {
+      song.loop();
+      analyzer = new p5.Amplitude();
+      analyzer.setInput(song);
+    }
+    isMusic = true;
   }
+}
+
+function rangeLinesUpdateCanvas(e) {
+  nbOfLines = e.target.value;
+  canvasClickHandler();
+}
+
+function rangeWeightUpdateCanvas(e) {
+  linesWeight = e.target.value;
+  canvasClickHandler();
+}
+
+function rangeNoiseUpdateCanvas(e) {
+  noiseValue = e.target.value;
+  canvasClickHandler();
 }
 
 function saveImage() {
@@ -109,6 +170,10 @@ function saveImage() {
 }
 
 p5canvas.addEventListener("click", canvasClickHandler);
+renderOptions.addEventListener("change", canvasClickHandler);
+rangeLines.addEventListener("input", rangeLinesUpdateCanvas);
+rangeWeight.addEventListener("input", rangeWeightUpdateCanvas);
+rangeNoise.addEventListener("input", rangeNoiseUpdateCanvas)
 saveButton.addEventListener("click", saveImage);
 
 
@@ -116,15 +181,25 @@ saveButton.addEventListener("click", saveImage);
 //// P5JS FUNCTIONS ////
 ////////////////////////
 
+
+function preload() {
+  song = loadSound('JoyDivision.mp3');
+}
+
 function setup() {
   // Setup canvas
   createCanvas(cover.width, cover.height);
 
-  frameRate(1);
-  drawRecodingRandom();
-  // draw();
+  if(!isMusic) {
+    // frameRate(1);
+    drawRecodingRandom();
+  } else {
+    noiseSeed(random(1000));
+  }
 }
 
 function draw() {
-  // drawRecodingRandom();
+  if(isMusic) {
+    drawRecodingRandom();
+  }
 }
