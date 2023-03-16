@@ -65,6 +65,7 @@ margin: 0;
 }
 
 .option {
+width: 125px;
 display: flex;
 justify-content: center;
 n-items: center;

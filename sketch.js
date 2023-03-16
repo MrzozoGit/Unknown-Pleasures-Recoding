@@ -9,12 +9,15 @@ let renderOptions = document.querySelector("#renderoptions");
 let rangeWeight = document.querySelector(".rangeWeight");
 let rangeLines = document.querySelector(".rangeLines");
 let rangeNoise = document.querySelector(".rangeNoise");
+let colorOptions = document.querySelector("#coloroptions");
 
 // Interaction variables
 let nbOfLines = 80;
 let linesWeight = 1.2;
 let noiseValue = 0.1;
 let isMusic = false;
+let colorBg = 'black';
+let colorLines = 'white';
 
 // Audio variables
 let song, analyzer, rms;
@@ -34,8 +37,8 @@ class UnknownPleasuresCover {
     this.noiseScaleBase = parseFloat(noiseValue);
     this.noiseScaleMiddle = noiseValue * 0.12;
     this.linesWeight = linesWeight;
-    this.bgColor = "#000000";
-    this.linesColor = "#FFFFFF";
+    this.bgColor = colorBg;
+    this.linesColor = colorLines;
     // Position
     this.xMin = 140;
     this.xMax = this.width - this.xMin;
@@ -132,20 +135,13 @@ function canvasClickHandler() {
       song.stop();
     }
     drawRecodingRandom();
-  } else if (renderOptions.value == "color-inv") {
-    if(isMusic == true) {
-      isMusic = false;
-      song.stop();
-    }
-    cover.bgColor = "#FFFFFFF";
-    cover.linesColor = "#000000";
-    drawRecodingRandom();
   } else if (renderOptions.value == "music") {
     if(isMusic == false) {
       song.loop();
       analyzer = new p5.Amplitude();
       analyzer.setInput(song);
     }
+    noiseSeed(random(1000));
     isMusic = true;
   }
 }
@@ -165,12 +161,20 @@ function rangeNoiseUpdateCanvas(e) {
   canvasClickHandler();
 }
 
+function changeColor(e) {
+  let colors = e.target.value.split(',');
+  colorBg = colors[0];
+  colorLines = colors[1];
+  canvasClickHandler();
+}
+
 function saveImage() {
   save();
 }
 
 p5canvas.addEventListener("click", canvasClickHandler);
 renderOptions.addEventListener("change", canvasClickHandler);
+colorOptions.addEventListener("change", changeColor)
 rangeLines.addEventListener("input", rangeLinesUpdateCanvas);
 rangeWeight.addEventListener("input", rangeWeightUpdateCanvas);
 rangeNoise.addEventListener("input", rangeNoiseUpdateCanvas)
@@ -193,8 +197,6 @@ function setup() {
   if(!isMusic) {
     // frameRate(1);
     drawRecodingRandom();
-  } else {
-    noiseSeed(random(1000));
   }
 }
 
