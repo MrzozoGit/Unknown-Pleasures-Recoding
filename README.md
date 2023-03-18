@@ -38,8 +38,8 @@ Pour composer des variations, nous avons déconstruit notre code. Des curseurs i
 
 Une variation supplémentaire transforme l’illustration en visualiseur de musique. Cela référence à la fois le contexte musical de l’illustration et son origine en tant que signal.
 
-![Preview d'une variation](previews/preview_variation_1.png "Preview d'une variation")
+![Preview d'une variation](previews/preview_variation1.png "Preview d'une variation")
 
-![Preview d'une variation](previews/preview_variation_5.png "Preview d'une variation")
+![Preview d'une variation](previews/preview_variation5.png "Preview d'une variation")
 
-![Preview d'une variation](previews/preview_variation_8.png "Preview d'une variation")
+![Preview d'une variation](previews/preview_variation8.png "Preview d'une variation")
